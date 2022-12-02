@@ -26,3 +26,5 @@ class Config:
     # Other constants
     i2c_freq = 100000
 
+    wifi_ssid = 'Alex-iPhone'
+    wifi_password = 'sb648qshx17zu'
