@@ -18,3 +18,11 @@ class Config:
     ss_pin = Pin(0)
     # Other constants
     spi_baudrate = 10000000
+
+    # I2C
+    # Pins:
+    scl = Pin(22)
+    sda = Pin(21)
+    # Other constants
+    i2c_freq = 100000
+
