@@ -5,8 +5,10 @@ class Protocol:
             'right_hand': 'rh',
             'left_hand': 'lh',
             'head': 'hd',
-            'right_wheel': 'rw',
-            'left_wheel': 'lw',
+            'move_forward': 'mf',
+            'move_backward': 'mb',
+            'move_left': 'ml',
+            'move_right': 'mr',
             'mood': 'md'
         }
         mood_dict = {
@@ -24,8 +26,10 @@ class Protocol:
             "rh": "right_hand",
             "lh": "left_hand",
             "hd": "head",
-            "rw": "right_wheel",
-            "lw": "left_wheel",
+            'mf': 'move_forward',
+            'mb': 'move_backward',
+            'ml': 'move_left',
+            'mr': 'move_right',
             "md": "mood",
         }
         mood_dict = {
