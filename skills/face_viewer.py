@@ -1,12 +1,32 @@
 from config import Config
 from libs import MAX7219
+from skills.interface import BaseSkill
 
 
-class FaceViewer:
-    def __init__(self, spi):
-        self.display = MAX7219(spi, Config.ss_pin, 1)
+class FaceViewer(BaseSkill):
+    """
+    TODO: write smth
+    """
 
-    def show_mood(self, mood: str):
+    def __init__(self, bus):
+        self.display = MAX7219(bus, Config.ss_pin, 1)
+
+    @property
+    def skill_tag(self):
+        return "fvs"
+
+    def run(self, params: dict) -> dict:
+        mood = params.get("mood")
+        if mood is None:
+            return {"status": False, "reason": "absent mood"}
+        else:
+            try:
+                self._show_mood(mood)
+                return {"status": True, "reason": "ok"}
+            except KeyError:
+                return {"status": False, "reason": "wrong mood"}
+
+    def _show_mood(self, mood: str):
         moods = {
             "smile": [[1, 1, 1, 0, 0, 1, 1, 1],
                       [1, 0, 1, 0, 0, 1, 0, 1],

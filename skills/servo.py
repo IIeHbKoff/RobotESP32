@@ -1,33 +1,32 @@
 from libs.pca9685 import PCA9685
-import math
+from config import Config
+from skills.interface import BaseSkill
 
 
-class Servos:
-    def __init__(self, i2c, inverted_channels=tuple(), address=0x40, freq=50, min_us=600, max_us=2400, degrees=180):
-        self.period = 1000000 / freq
-        self.min_duty = self._us2duty(min_us)
-        self.max_duty = self._us2duty(max_us)
-        self.degrees = degrees
-        self.freq = freq
-        self.pca9685 = PCA9685(i2c, address)
-        self.pca9685.freq(freq)
-        self.inverted_channels = inverted_channels
+class ServosSkill(BaseSkill):
+    """
+    TODO: write smth
+    """
+    def __init__(self, bus):
+        self._servo_driver = PCA9685(i2c=bus, address=Config.servo_board_i2c_addr, inverted_channels=(2,))
+        self._servos = {"head": 0, "right_arm": 1, "left_arm": 2}
 
-    def _us2duty(self, value):
-        return int(4095 * value / self.period)
+    @property
+    def skill_tag(self):
+        return "sds"
 
-    def position(self, index, degrees=None, us=None, duty=None):
-        span = self.max_duty - self.min_duty
-        if degrees is not None:
-            duty = self.min_duty + span * (degrees if index not in self.inverted_channels else 180-degrees) / self.degrees
-        elif us is not None:
-            duty = self._us2duty(us)
-        elif duty is not None:
-            pass
+    def run(self, params: dict) -> dict:
+        servo = params.get("servo")
+        servo_value = params.get("servo_value")
+        if servo is None:
+            return {"status": False, "reason": "absent servo param"}
         else:
-            return self.pca9685.duty(index)
-        duty = min(self.max_duty, max(self.min_duty, int(duty)))
-        self.pca9685.duty(index, duty)
+            try:
+                self._move(channel=self._servos[servo], servo_value=servo_value)
+            except KeyError:
+                return {"status": False, "reason": "absent servo channel"}
+            except Exception as e:
+                return {"status": False, "reason": e}
 
-    def release(self, index):
-        self.pca9685.duty(index, 0)
+    def _move(self, channel, servo_value):
+        self._servo_driver.position(index=channel, degrees=servo_value)
