@@ -3,17 +3,21 @@ from libs import MAX7219
 from skills.interface import BaseSkill
 
 
-class FaceViewer(BaseSkill):
+class FaceViewSkill(BaseSkill):
     """
     TODO: write smth
     """
+    _instance = None
+    _display = None
 
-    def __init__(self, bus):
-        self.display = MAX7219(bus, Config.ss_pin, 1)
+    class_name = __qualname__
+    skill_tag = "fvs"
 
-    @property
-    def skill_tag(self):
-        return "fvs"
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(FaceViewSkill, cls).__new__(cls)
+            cls._display = MAX7219(Config.spi_1, Config.ss_pin, 1)
+        return cls._instance
 
     def run(self, params: dict) -> dict:
         mood = params.get("mood")
@@ -77,10 +81,10 @@ class FaceViewer(BaseSkill):
                           [0, 0, 0, 1, 1, 0, 0, 0],
                           [0, 0, 0, 1, 1, 0, 0, 0], ],
         }
-        self.display.fill(0)
-        self.display.show()
+        self._display.fill(0)
+        self._display.show()
         for i in range(8):
             for j in range(8):
                 if moods[mood][i][j]:
-                    self.display.pixel(7 - i, j, 1)
-        self.display.show()
+                    self._display.pixel(7 - i, j, 1)
+        self._display.show()

@@ -3,17 +3,27 @@ from config import Config
 from skills.interface import BaseSkill
 
 
-class ServosSkill(BaseSkill):
+class ServoSkill(BaseSkill):
     """
     TODO: write smth
     """
-    def __init__(self, bus):
-        self._servo_driver = PCA9685(i2c=bus, address=Config.servo_board_i2c_addr, inverted_channels=(2,))
-        self._servos = {"head": 0, "right_arm": 1, "left_arm": 2}
+    _instance = None
+    _servo_driver = None
+    _servos = None
 
-    @property
-    def skill_tag(self):
-        return "sds"
+    class_name = __qualname__
+    skill_tag = "sds"
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(ServoSkill, cls).__new__(cls)
+            cls._servos = Config.servos_channels
+            cls._servo_driver = PCA9685(
+                i2c=Config.i2c_0,
+                address=Config.servo_board_i2c_addr,
+                inverted_channels=(channel["number"] for channel in cls._servos if channel["is_inverted"] is True)
+            )
+        return cls._instance
 
     def run(self, params: dict) -> dict:
         servo = params.get("servo")

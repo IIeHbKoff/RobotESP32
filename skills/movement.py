@@ -6,12 +6,17 @@ class MovementSkill(BaseSkill):
     """
     TODO: write smth
     """
-    def __init__(self, bus):
-        self._driver = MX1508()
+    _instance = None
+    _driver = None
 
-    @property
-    def skill_tag(self):
-        return "mws"
+    class_name = __qualname__
+    skill_tag = "mws"
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(MovementSkill, cls).__new__(cls)
+            cls._driver = MX1508()
+        return cls._instance
 
     def run(self, params: dict) -> dict:
         pass
