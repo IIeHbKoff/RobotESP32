@@ -4,13 +4,6 @@ from abc import ABC, abstractmethod
 class BaseSkill(ABC):
 
     @abstractmethod
-    def __init__(self, bus=None) -> None:
-        """
-
-        @param bus: connect
-        """
-
-    @abstractmethod
     def run(self, params: dict) -> dict:
         """
 
@@ -21,6 +14,13 @@ class BaseSkill(ABC):
     @abstractmethod
     @property
     def skill_tag(self):
+        """
+        @return: str
+        """
+
+    @abstractmethod
+    @property
+    def class_name(self):
         """
         @return: str
         """
