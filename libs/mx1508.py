@@ -39,6 +39,27 @@ class MX1508:
         self.pwm2_a.duty_u16(self._get_speed(0))
         self.pwm2_b.duty_u16(self._get_speed(0))
 
+    def rotate_wheels(self, left_speed, right_speed):
+        if left_speed > 0:
+            self.pwm1_a.duty_u16(self._get_speed(left_speed))
+            self.pwm1_b.duty_u16(self._get_speed(0))
+        elif left_speed < 0:
+            self.pwm1_a.duty_u16(self._get_speed(0))
+            self.pwm1_b.duty_u16(self._get_speed(abs(left_speed)))
+        else:
+            self.pwm1_a.duty_u16(self._get_speed(0))
+            self.pwm1_b.duty_u16(self._get_speed(0))
+
+        if right_speed > 0:
+            self.pwm2_a.duty_u16(self._get_speed(right_speed))
+            self.pwm2_b.duty_u16(self._get_speed(0))
+        elif right_speed < 0:
+            self.pwm2_a.duty_u16(self._get_speed(0))
+            self.pwm2_b.duty_u16(self._get_speed(abs(right_speed)))
+        else:
+            self.pwm2_a.duty_u16(self._get_speed(0))
+            self.pwm2_b.duty_u16(self._get_speed(0))
+
     @staticmethod
     def _get_speed(speed) -> int:
         if speed == 0:

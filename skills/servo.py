@@ -1,6 +1,8 @@
+from common_files.constants import Constants
 from libs.pca9685 import PCA9685
 from config import Config
 from skills.interface import BaseSkill
+from common_files.protocol import Protocol
 
 
 class ServoSkill(BaseSkill):
@@ -12,7 +14,7 @@ class ServoSkill(BaseSkill):
     _servos = None
 
     class_name = __qualname__
-    skill_tag = "sds"
+    skill_tag = Constants.SERVO_SKILL_TAG
 
     def __new__(cls):
         if cls._instance is None:
@@ -25,18 +27,25 @@ class ServoSkill(BaseSkill):
             )
         return cls._instance
 
-    def run(self, params: dict) -> dict:
-        servo = params.get("servo")
-        servo_value = params.get("servo_value")
+    def run(self, params: str) -> str:
+
+        split_params = params.split(",")
+        servo = split_params[0]
+        servo_value = int(split_params[1])
+
         if servo is None:
-            return {"status": False, "reason": "absent servo param"}
+            return str(Protocol.ABSENT_SERVO_VALUE)
         else:
             try:
-                self._move(channel=self._servos[servo], servo_value=servo_value)
+                self._move(channel=self._servos[servo]["number"], servo_value=servo_value)
+                return self._create_answer_packet(status_code=Protocol.SUCCESS)
             except KeyError:
-                return {"status": False, "reason": "absent servo channel"}
+                return self._create_answer_packet(status_code=Protocol.ABSENT_SERVO_CHANNEL)
             except Exception as e:
-                return {"status": False, "reason": e}
+                return self._create_answer_packet(status_code=Protocol.SOMETHING_WRONG)
 
     def _move(self, channel, servo_value):
         self._servo_driver.position(index=channel, degrees=servo_value)
+
+    def _create_answer_packet(self, status_code, data=None):
+        return f"{self.skill_tag}:{data},{status_code}"
