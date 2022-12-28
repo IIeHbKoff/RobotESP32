@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 class BaseSkill(ABC):
 
     @abstractmethod
-    def run(self, params: str) -> dict:
+    def run(self, params: str) -> None:
         """
 
         @param params: dict
@@ -13,23 +13,14 @@ class BaseSkill(ABC):
 
     @abstractmethod
     @property
-    def skill_tag(self):
+    def skill_tag(self) -> str:
         """
         @return: str
         """
 
     @abstractmethod
     @property
-    def class_name(self):
+    def class_name(self) -> str:
         """
-        @return: str
-        """
-
-    @abstractmethod
-    def _create_answer_packet(self, status_code, data=None):
-        """
-
-        @param status_code: int
-        @param data: Optional[str]
         @return: str
         """

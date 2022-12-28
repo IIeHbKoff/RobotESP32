@@ -26,11 +26,6 @@ class Config:
     sda = Pin(21, Pin.OUT)
     # Other constants
     i2c_freq = 100000
-    servos_channels = {
-        "head": {"number": 0, "is_inverted": False},
-        "right_arm": {"number": 1, "is_inverted": False},
-        "left_arm": {"number": 2, "is_inverted": True}
-    }
     servo_board_i2c_addr = 0x40
 
     wifi_ssid = 'Alex-iPhone'

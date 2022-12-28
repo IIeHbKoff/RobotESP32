@@ -1,3 +1,4 @@
+from common_files import Telemetry
 from common_files.constants import Constants
 from libs.pca9685 import PCA9685
 from config import Config
@@ -19,33 +20,28 @@ class ServoSkill(BaseSkill):
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super(ServoSkill, cls).__new__(cls)
-            cls._servos = Config.servos_channels
+            cls._servos = Constants.SERVOS_CHANNELS
             cls._servo_driver = PCA9685(
                 i2c=Config.i2c_0,
                 address=Config.servo_board_i2c_addr,
-                inverted_channels=(channel["number"] for channel in cls._servos if channel["is_inverted"] is True)
+                inverted_channels=(channel_number for channel_number, channel_data in cls._servos.items()
+                                   if channel_data["is_inverted"] is True)
             )
+            cls._telemetry = Telemetry()
         return cls._instance
 
-    def run(self, params: str) -> str:
-
+    def run(self, params: str) -> None:
         split_params = params.split(",")
-        servo = split_params[0]
+        servo = int(split_params[0])
         servo_value = int(split_params[1])
 
         if servo is None:
-            return str(Protocol.ABSENT_SERVO_VALUE)
+            self._telemetry.errors = Protocol.ABSENT_SERVO_VALUE
         else:
             try:
-                self._move(channel=self._servos[servo]["number"], servo_value=servo_value)
-                return self._create_answer_packet(status_code=Protocol.SUCCESS)
+                self._servo_driver.position(index=servo, degrees=servo_value)
+                self._telemetry.__setattr__(f"sch{servo}", servo_value)
             except KeyError:
-                return self._create_answer_packet(status_code=Protocol.ABSENT_SERVO_CHANNEL)
+                self._telemetry.errors = Protocol.ABSENT_SERVO_CHANNEL
             except Exception as e:
-                return self._create_answer_packet(status_code=Protocol.SOMETHING_WRONG)
-
-    def _move(self, channel, servo_value):
-        self._servo_driver.position(index=channel, degrees=servo_value)
-
-    def _create_answer_packet(self, status_code, data=None):
-        return f"{self.skill_tag}:{data},{status_code}"
+                self._telemetry.errors = Protocol.SOMETHING_WRONG
