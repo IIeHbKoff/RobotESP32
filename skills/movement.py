@@ -23,13 +23,8 @@ class MovementSkill(BaseSkill):
             cls._telemetry = Telemetry()
         return cls._instance
 
-    def run(self, params: str) -> None:
-        split_params = params.split(",")
+    def run(self) -> None:
         try:
-            left_wheel_speed = int(split_params[0])
-            right_wheel_speed = int(split_params[1])
-            self._driver.rotate_wheels(left_speed=left_wheel_speed, right_speed=right_wheel_speed)
-            self._telemetry.rwS = right_wheel_speed
-            self._telemetry.lwS = left_wheel_speed
-        except Exception:
+            self._driver.rotate_wheels(left_speed=int(self._telemetry.lws), right_speed=int(self._telemetry.rws))
+        except Exception as e:
             self._telemetry.errors = Protocol.SOMETHING_WRONG

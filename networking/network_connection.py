@@ -1,6 +1,6 @@
 import time
 
-from config import Config
+from common_files import Constants
 import socket
 import network
 
@@ -18,7 +18,7 @@ class NetworkConnection:
         self.wifi = network.WLAN(network.STA_IF)
         self.wifi.active(True)
         self.wifi.disconnect()
-        self.wifi.connect(Config.wifi_ssid, Config.wifi_password)
+        self.wifi.connect(Constants.WIFI_SSID, Constants.WIFI_PASSWORD)
         while not self.wifi.isconnected():
             time.sleep(1)
         return self.wifi.ifconfig()

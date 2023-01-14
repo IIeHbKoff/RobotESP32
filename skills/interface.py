@@ -1,13 +1,14 @@
-from abc import ABC, abstractmethod
+try:
+    from abc import ABC, abstractmethod
+except ImportError:
+    from libs.abc import ABC, abstractmethod
 
 
 class BaseSkill(ABC):
 
     @abstractmethod
-    def run(self, params: str) -> None:
+    def run(self) -> None:
         """
-
-        @param params: dict
         @return: dict
         """
 

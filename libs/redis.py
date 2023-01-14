@@ -3,12 +3,13 @@ try:
 except ImportError:
     import socket
 
-try:
-    import uselect as select
-except ImportError:
-    import select
-
-CRLF = "\r\n"
+SYM_STAR = "*"
+SYM_PLUS = "+"
+SYM_MINUS = "-"
+SYM_COLON = ":"
+SYM_DOLLAR = "$"
+SYM_CRLF = "\r\n"
+SYM_EMPTY = ""
 
 
 class RedisError(Exception):
@@ -34,6 +35,8 @@ class Redis:
         self._host = host
         self._port = port
         self._timeout = timeout
+        self._opened_pipeline = False
+        self._cmds = list()
 
     def __call__(self, cmd, *args):
         return self.do_cmd(cmd, *args)
@@ -54,7 +57,19 @@ class Redis:
             self._sock.close()
             self._sock = None
 
-    def do_cmd(self, cmd, *args):
+    def pipeline(self, transaction=False):
+        if self._opened_pipeline:
+            raise RedisError("You already has opened pipeline")
+        self._opened_pipeline = True
+        return self
+
+    def execute(self):
+        self._opened_pipeline = False
+        res = self._execute_many()
+        self._cmds.clear()
+        return res
+
+    def _execute(self, cmd, *args):
         if not self._sock:
             raise RedisError("Not connected: use 'connect()' to connect to Redis server.")
 
@@ -66,44 +81,61 @@ class Redis:
         self._sock.send(request.encode('utf-8'))
         return self._read_response()
 
+    def _execute_many(self):
+        pieces = list()
+        result = list()
+        for cmd in self._cmds:
+            pieces.append(self._encode_request(*cmd))
+        request = SYM_EMPTY.join(pieces)
+        self._sock.send(request.encode('utf-8'))
+        for _ in range(len(pieces)):
+            result.append(self._read_response())
+        return result
+
     def get(self, key: str):
-        return self.do_cmd("GET", key).decode()
+        cmd = "GET"
+        if self._opened_pipeline:
+            self._cmds.append((cmd, key))
+        else:
+            return self._execute(cmd, key)
 
     def set(self, key: str, data: str):
-        return self.do_cmd("SET", key, data).decode()
+        cmd = "SET"
+        if self._opened_pipeline:
+            self._cmds.append((cmd, key, data))
+        else:
+            return self._execute(cmd, key, data)
 
     @staticmethod
     def _encode_request(*args):
         """Pack a series of arguments into a RESP array of bulk strings."""
-        result = ["*" + str(len(args)) + CRLF]
+        result = [f"{SYM_STAR}{str(len(args))}{SYM_CRLF}"]
 
         for arg in args:
             if arg is None:
-                result.append('$-1' + CRLF)
+                result.append(f"{SYM_DOLLAR}-1{SYM_CRLF}")
             else:
                 s = str(arg)
-                result.append('$' + str(len(s)) + CRLF + s + CRLF)
-
+                result.append(f"{SYM_DOLLAR}{str(len(s))}{SYM_CRLF}{s}{SYM_CRLF}")
         return "".join(result)
 
     def _read_response(self):
-        line = self._read_until(lambda l, pos: l[-2:] == b'\r\n')
+        line = self._read_until(lambda l, pos: l[-2:] == SYM_CRLF.encode())
         rtype = line[:1].decode('utf-8')
 
-        if rtype == '+':
+        if rtype == SYM_PLUS:
             return line[1:-2]
-        elif rtype == '-':
+        elif rtype == SYM_MINUS:
             raise RedisError(*line[1:-2].decode('utf-8').split(None, 1))
-        elif rtype == ':':
+        elif rtype == SYM_COLON:
             return int(line[1:-2])
-        elif rtype == '$':
+        elif rtype == SYM_DOLLAR:
             length = int(line[1:-2])
-
             if length == -1:
                 return None
 
             return self._read_until(lambda l, pos: pos == length + 2)[:-2]
-        elif rtype == '*':
+        elif rtype == SYM_STAR:
             length = int(line[1:-2])
 
             if length == -1:

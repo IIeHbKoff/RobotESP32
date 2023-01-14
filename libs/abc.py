@@ -2,7 +2,6 @@ class ABCMeta:
     pass
 
 
-# class ABC(metaclass=ABCMeta):
 class ABC:
     pass
 
