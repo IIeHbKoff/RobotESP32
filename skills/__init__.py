@@ -4,6 +4,7 @@ from skills.face_view import FaceViewSkill
 from skills.distance_meter import DistanceMeterSkill
 from skills.compas import CompasSkill
 from skills.accelerometer_and_gyroscope import AccelerometerAndGyroscopeSkill
+from skills.micro_climate import MicroClimateSkill
 
 skill_dict = {
     ServoSkill.skill_tag: ServoSkill,
@@ -12,4 +13,5 @@ skill_dict = {
     DistanceMeterSkill.skill_tag: DistanceMeterSkill,
     CompasSkill.skill_tag: CompasSkill,
     AccelerometerAndGyroscopeSkill.skill_tag: AccelerometerAndGyroscopeSkill,
+    MicroClimateSkill.skill_tag: MicroClimateSkill,
 }
