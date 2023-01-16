@@ -2,8 +2,8 @@ from common_files import Telemetry
 from common_files.constants import Constants
 from libs.pca9685 import Servos
 from config import Config
+from skills.common_funcs import skill_wrapper
 from skills.interface import BaseSkill
-from common_files.protocol import Protocol
 
 
 class ServoSkill(BaseSkill):
@@ -28,9 +28,7 @@ class ServoSkill(BaseSkill):
             cls._telemetry = Telemetry()
         return cls._instance
 
+    @skill_wrapper
     def run(self) -> None:
         for number, info in Constants.SERVOS_CHANNELS.items():
-            try:
-                self._servo_driver.position(index=number, degrees=int(getattr(self._telemetry, info["name"])))
-            except Exception as e:
-                self._telemetry.errors = Protocol.SOMETHING_WRONG
+            self._servo_driver.position(index=number, degrees=int(getattr(self._telemetry, info["name"])))

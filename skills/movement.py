@@ -1,8 +1,8 @@
 from common_files import Telemetry
 from common_files.constants import Constants
 from libs import MX1508
+from skills.common_funcs import skill_wrapper
 from skills.interface import BaseSkill
-from common_files.protocol import Protocol
 
 
 class MovementSkill(BaseSkill):
@@ -23,8 +23,6 @@ class MovementSkill(BaseSkill):
             cls._telemetry = Telemetry()
         return cls._instance
 
+    @skill_wrapper
     def run(self) -> None:
-        try:
-            self._driver.rotate_wheels(left_speed=int(self._telemetry.lws), right_speed=int(self._telemetry.rws))
-        except Exception as e:
-            self._telemetry.errors = Protocol.SOMETHING_WRONG
+        self._driver.rotate_wheels(left_speed=int(self._telemetry.lws), right_speed=int(self._telemetry.rws))

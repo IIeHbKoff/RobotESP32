@@ -1,7 +1,8 @@
-from common_files import Telemetry, Protocol
+from common_files import Telemetry
 from common_files.constants import Constants
 from config import Config
 from libs import HCSR04
+from skills.common_funcs import skill_wrapper
 from skills.interface import BaseSkill
 
 
@@ -21,8 +22,6 @@ class DistanceMeterSkill(BaseSkill):
             cls._telemetry = Telemetry()
         return cls._instance
 
+    @skill_wrapper
     def run(self) -> None:
-        try:
-            self._telemetry.dist = self._sensor.distance_mm()
-        except Exception as e:
-            self._telemetry.errors = Protocol.SOMETHING_WRONG
+        self._telemetry.dist = self._sensor.distance_mm()

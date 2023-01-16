@@ -2,8 +2,8 @@ from common_files import Telemetry
 from common_files.constants import Constants
 from config import Config
 from libs import MAX7219
+from skills.common_funcs import skill_wrapper
 from skills.interface import BaseSkill
-from common_files.protocol import Protocol
 
 
 class FaceViewSkill(BaseSkill):
@@ -22,12 +22,9 @@ class FaceViewSkill(BaseSkill):
             cls._telemetry = Telemetry()
         return cls._instance
 
+    @skill_wrapper
     def run(self) -> None:
-        data = self._telemetry.mood
-        try:
-            self._show(data)
-        except Exception as e:
-            self._telemetry.errors = Protocol.SOMETHING_WRONG
+        self._show(self._telemetry.mood)
 
     def _show(self, data: list):
         self._display.fill(0)

@@ -1,7 +1,8 @@
-from common_files import Telemetry, Protocol
+from common_files import Telemetry
 from common_files.constants import Constants
 from config import Config
 from libs import MPU6050
+from skills.common_funcs import skill_wrapper
 from skills.interface import BaseSkill
 
 
@@ -21,14 +22,12 @@ class AccelerometerAndGyroscopeSkill(BaseSkill):
             cls._telemetry = Telemetry()
         return cls._instance
 
+    @skill_wrapper
     def run(self) -> None:
-        try:
-            data = self._sensor.get_values()
-            self._telemetry.acX = data["AcX"]
-            self._telemetry.acY = data["AcY"]
-            self._telemetry.acZ = data["AcZ"]
-            self._telemetry.gyX = data["GyX"]
-            self._telemetry.gyY = data["GyY"]
-            self._telemetry.gyZ = data["GyZ"]
-        except Exception as e:
-            self._telemetry.errors = f"{self.class_name}: {e}"
+        data = self._sensor.get_values()
+        self._telemetry.acX = data["AcX"]
+        self._telemetry.acY = data["AcY"]
+        self._telemetry.acZ = data["AcZ"]
+        self._telemetry.gyX = data["GyX"]
+        self._telemetry.gyY = data["GyY"]
+        self._telemetry.gyZ = data["GyZ"]
