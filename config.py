@@ -2,7 +2,7 @@ from machine import Pin, SPI, I2C
 
 
 class Config:
-    firmware_version = "1.5.0"
+    firmware_version = "1.6.0"
     # Moving settings
     # Pins:
     motor1_a = Pin(2)

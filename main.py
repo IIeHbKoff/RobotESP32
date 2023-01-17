@@ -11,7 +11,7 @@ class Robot:
         self.networking = NetworkConnection()
         self.protocol = Protocol()
         self.utils = Utils()
-        # self.viewer = skills.FaceViewSkill()
+        self.viewer = skills.LCDDisplaySkill()
         self.telemetry = Telemetry()
         self.frame_time = 1000/Constants.WINDOW_FPS
 
@@ -21,11 +21,12 @@ class Robot:
         self._i_will_be_back()
 
     def _connecting(self) -> None:
-        # self._show_technical_info("connecting")
+        self.viewer.show_text("connecting")
         self.networking.connect_to_wifi()
-        time.sleep(3)
+        time.sleep(1)
         self.utils.connect()
-        # self._show_technical_info("connected")
+        self.viewer.show_text("connected")
+        time.sleep(1)
 
     def _life_cycle(self) -> None:
         while True:
@@ -33,6 +34,7 @@ class Robot:
             for name, skill in skills.skill_dict.items():
                 skill().run()
             self.utils.send_telemetry()
+            print(self.telemetry.errors)
             del self.telemetry.errors
 
     def _i_will_be_back(self) -> None:
